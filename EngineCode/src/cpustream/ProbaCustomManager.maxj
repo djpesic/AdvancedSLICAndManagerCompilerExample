@@ -1,0 +1,66 @@
+package cpustream;
+
+import com.maxeler.maxcompiler.v2.build.EngineParameters;
+import com.maxeler.maxcompiler.v2.kernelcompiler.Kernel;
+import com.maxeler.maxcompiler.v2.managers.custom.CustomManager;
+import com.maxeler.maxcompiler.v2.managers.custom.DFELink;
+import com.maxeler.maxcompiler.v2.managers.custom.blocks.KernelBlock;
+import com.maxeler.maxcompiler.v2.managers.engine_interfaces.CPUTypes;
+import com.maxeler.maxcompiler.v2.managers.engine_interfaces.EngineInterface;
+import com.maxeler.maxcompiler.v2.managers.engine_interfaces.InterfaceParam;
+
+public class ProbaCustomManager extends CustomManager{
+
+	public ProbaCustomManager(EngineParameters engineParams) {
+		super(engineParams);
+		Kernel k1=new CpuStreamKernel(makeKernelParameters("KernelAdder"));
+		KernelBlock kb1=addKernel(k1);
+		Kernel k2=new CpuStreamKernel1(makeKernelParameters("KernelSubtractor"));
+		KernelBlock kb2=addKernel(k2);
+
+		DFELink x=addStreamFromCPU("x");
+		DFELink y=addStreamFromCPU("y");
+		DFELink z=addStreamFromCPU("z");
+
+		kb1.getInput("x") <== x;
+		kb1.getInput("y") <== y;
+
+		DFELink s1=kb1.getOutput("s");
+
+
+		kb2.getInput("x") <== s1;
+		kb2.getInput("y") <==z;
+
+		DFELink s2=kb2.getOutput("s");
+
+		DFELink result=addStreamToCPU("result");
+
+		result<==s2;
+
+
+
+
+
+	}
+
+	public EngineInterface interfaceDefault(){
+		EngineInterface ei=new EngineInterface();
+		InterfaceParam size=ei.addParam("size", CPUTypes.INT32,"length of streams");
+		ei.setTicks("KernelAdder", size);
+		ei.setTicks("KernelSubtractor", size);
+		ei.setStream("x", CPUTypes.INT32, size*CPUTypes.INT32.sizeInBytes());
+		ei.setStream("y", CPUTypes.INT32, size*CPUTypes.INT32.sizeInBytes());
+		ei.setStream("z", CPUTypes.INT32, size*CPUTypes.INT32.sizeInBytes());
+		ei.setStream("result",CPUTypes.INT32,size*CPUTypes.INT32.sizeInBytes());
+		return ei;
+	}
+
+	public static void main(String[] args){
+		EngineParameters params=new EngineParameters(args);
+		ProbaCustomManager manager=new ProbaCustomManager(params);
+		manager.createSLiCinterface(manager.interfaceDefault());
+		manager.build();
+	}
+
+
+}
