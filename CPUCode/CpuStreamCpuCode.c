@@ -54,12 +54,11 @@ int chainedKernelsRun(){
 	int32_t *x=calloc(size,size*sizeof(int32_t));
 	int32_t *y=calloc(size, sizeof(int32_t));
 	int32_t *z=calloc(size, sizeof(int32_t));
-	int32_t *result=calloc(size, sizeof(int32_t));
+
 
 	for(int i=0;i<size;i++){
 		x[i]=i;
 		y[i]=i+1;
-		z[i]=i+2;
 	}
 	printf("x: ");
 	for(int i=0;i<size;i++)printf("%d ",x[i]);
@@ -67,14 +66,12 @@ int chainedKernelsRun(){
 	printf("y: ");
 	for(int i=0;i<size;i++)printf("%d ",y[i]);
 	printf("\n");
-	printf("z: ");
+
+	ProbaCustom(size,x,y,z);
+
 	for(int i=0;i<size;i++)printf("%d ",z[i]);
 	printf("\n");
 
-	ProbaCustom(size,x,y,z,result);
-
-	for(int i=0;i<size;i++)printf("%d ",result[i]);
-	printf("\n");
 	return 0;
 }
 int main(){

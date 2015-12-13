@@ -10,14 +10,14 @@ import com.maxeler.maxcompiler.v2.managers.engine_interfaces.InterfaceParam;
 import com.maxeler.maxcompiler.v2.managers.standard.IOLink.IODestination;
 import com.maxeler.maxcompiler.v2.managers.standard.Manager;
 
-public class CpuStreamManager {
+public class ManagerAdder {
 
 	private static final String s_kernelName = "CpuStreamKernel";
 
 	public static void main(String[] args) {
 		CpuStreamEngineParameters params = new CpuStreamEngineParameters(args);
 		Manager manager = new Manager(params);
-		Kernel kernel   = new CpuStreamKernel(manager.makeKernelParameters(s_kernelName));
+		Kernel kernel   = new KernelAdder(manager.makeKernelParameters(s_kernelName));
 		manager.setKernel(kernel);
 		manager.setIO(
 			link("x",   IODestination.CPU),

@@ -4,7 +4,9 @@ import com.maxeler.maxcompiler.v2.build.EngineParameters;
 import com.maxeler.maxcompiler.v2.kernelcompiler.Kernel;
 import com.maxeler.maxcompiler.v2.managers.custom.CustomManager;
 import com.maxeler.maxcompiler.v2.managers.custom.DFELink;
+import com.maxeler.maxcompiler.v2.managers.custom.blocks.Demux;
 import com.maxeler.maxcompiler.v2.managers.custom.blocks.KernelBlock;
+import com.maxeler.maxcompiler.v2.managers.custom.blocks.Mux;
 import com.maxeler.maxcompiler.v2.managers.engine_interfaces.CPUTypes;
 import com.maxeler.maxcompiler.v2.managers.engine_interfaces.EngineInterface;
 import com.maxeler.maxcompiler.v2.managers.engine_interfaces.InterfaceParam;
@@ -13,32 +15,33 @@ public class ProbaCustomManager extends CustomManager{
 
 	public ProbaCustomManager(EngineParameters engineParams) {
 		super(engineParams);
-		Kernel k1=new CpuStreamKernel(makeKernelParameters("KernelAdder"));
-		KernelBlock kb1=addKernel(k1);
-		Kernel k2=new CpuStreamKernel1(makeKernelParameters("KernelSubtractor"));
-		KernelBlock kb2=addKernel(k2);
+		Kernel kAdder=new KernelAdder(makeKernelParameters("KernelAdder"));
+		KernelBlock kbAdder=addKernel(kAdder);
+		Kernel kSubtractor=new KernelSubtractor(makeKernelParameters("KernelSubtractor"));
+		KernelBlock kbSubtractor=addKernel(kSubtractor);
 
 		DFELink x=addStreamFromCPU("x");
 		DFELink y=addStreamFromCPU("y");
-		DFELink z=addStreamFromCPU("z");
 
-		kb1.getInput("x") <== x;
-		kb1.getInput("y") <== y;
+		Demux demuxX=demux("demuxX");
+		Demux demuxY=demux("demuxY");
 
-		DFELink s1=kb1.getOutput("s");
-
-
-		kb2.getInput("x") <== s1;
-		kb2.getInput("y") <==z;
-
-		DFELink s2=kb2.getOutput("s");
-
-		DFELink result=addStreamToCPU("result");
-
-		result<==s2;
+		demuxX.getInput()<==x;
+		demuxY.getInput()<==y;
 
 
 
+		kbAdder.getInput("x")<==demuxX.addOutput("x_add");
+		kbAdder.getInput("y")<==demuxY.addOutput("y_add");
+		kbSubtractor.getInput("x")<==demuxX.addOutput("x_sub");
+		kbSubtractor.getInput("y")<==demuxY.addOutput("y_sub");
+
+		Mux muxRes=mux("muxRes");
+		muxRes.addInput("res_add")<==kbAdder.getOutput("s");
+		muxRes.addInput("res_sub")<==kbSubtractor.getOutput("s");
+
+
+		addStreamToCPU("z")<==muxRes.getOutput();
 
 
 	}
@@ -51,7 +54,7 @@ public class ProbaCustomManager extends CustomManager{
 		ei.setStream("x", CPUTypes.INT32, size*CPUTypes.INT32.sizeInBytes());
 		ei.setStream("y", CPUTypes.INT32, size*CPUTypes.INT32.sizeInBytes());
 		ei.setStream("z", CPUTypes.INT32, size*CPUTypes.INT32.sizeInBytes());
-		ei.setStream("result",CPUTypes.INT32,size*CPUTypes.INT32.sizeInBytes());
+		ei.route("x_sub->demuxX,y_sub->demuxY,res_sub->muxRes");
 		return ei;
 	}
 
