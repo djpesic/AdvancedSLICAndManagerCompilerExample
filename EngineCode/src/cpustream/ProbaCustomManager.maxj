@@ -19,6 +19,8 @@ public class ProbaCustomManager extends CustomManager{
 		KernelBlock kbAdder=addKernel(kAdder);
 		Kernel kSubtractor=new KernelSubtractor(makeKernelParameters("KernelSubtractor"));
 		KernelBlock kbSubtractor=addKernel(kSubtractor);
+		Kernel kMultiplier=new KernelMultiplier(makeKernelParameters("KernelMultiplier"));
+		KernelBlock kbMultiplier=addKernel(kMultiplier);
 
 		DFELink x=addStreamFromCPU("x");
 		DFELink y=addStreamFromCPU("y");
@@ -35,10 +37,13 @@ public class ProbaCustomManager extends CustomManager{
 		kbAdder.getInput("y")<==demuxY.addOutput("y_add");
 		kbSubtractor.getInput("x")<==demuxX.addOutput("x_sub");
 		kbSubtractor.getInput("y")<==demuxY.addOutput("y_sub");
+		kbMultiplier.getInput("x")<==demuxX.addOutput("x_mul");
+		kbMultiplier.getInput("y")<==demuxY.addOutput("y_mul");
 
 		Mux muxRes=mux("muxRes");
 		muxRes.addInput("res_add")<==kbAdder.getOutput("s");
 		muxRes.addInput("res_sub")<==kbSubtractor.getOutput("s");
+		muxRes.addInput("res_mul")<==kbMultiplier.getOutput("s");
 
 
 		addStreamToCPU("z")<==muxRes.getOutput();
@@ -51,10 +56,11 @@ public class ProbaCustomManager extends CustomManager{
 		InterfaceParam size=ei.addParam("size", CPUTypes.INT32,"length of streams");
 		ei.setTicks("KernelAdder", size);
 		ei.setTicks("KernelSubtractor", size);
+		ei.setTicks("KernelMultiplier",size);
 		ei.setStream("x", CPUTypes.INT32, size*CPUTypes.INT32.sizeInBytes());
 		ei.setStream("y", CPUTypes.INT32, size*CPUTypes.INT32.sizeInBytes());
 		ei.setStream("z", CPUTypes.INT32, size*CPUTypes.INT32.sizeInBytes());
-		ei.route("x_sub->demuxX,y_sub->demuxY,res_sub->muxRes");
+
 		return ei;
 	}
 

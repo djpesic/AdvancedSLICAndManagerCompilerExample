@@ -2,6 +2,7 @@ package cpustream;
 
 import static com.maxeler.maxcompiler.v2.managers.standard.Manager.link;
 
+import com.maxeler.maxcompiler.v2.build.EngineParameters;
 import com.maxeler.maxcompiler.v2.kernelcompiler.Kernel;
 import com.maxeler.maxcompiler.v2.managers.BuildConfig;
 import com.maxeler.maxcompiler.v2.managers.engine_interfaces.CPUTypes;
@@ -12,10 +13,10 @@ import com.maxeler.maxcompiler.v2.managers.standard.Manager;
 
 public class ManagerSubtractor {
 
-	private static final String s_kernelName = "CpuStreamKernel1";
+	private static final String s_kernelName = "ManagerSubtractor";
 
 	public static void main(String[] args) {
-		CpuStreamEngineParameters params = new CpuStreamEngineParameters(args);
+		EngineParameters params = new EngineParameters(args);
 		Manager manager = new Manager(params);
 		Kernel kernel   = new KernelSubtractor(manager.makeKernelParameters(s_kernelName));
 		manager.setKernel(kernel);
@@ -47,7 +48,7 @@ public class ManagerSubtractor {
 		engine_interface.setStream("s", type, N * size);
 		return engine_interface;
 	}
-	private static void configBuild(Manager manager, CpuStreamEngineParameters params) {
+	private static void configBuild(Manager manager, EngineParameters params) {
 		manager.setEnableStreamStatusBlocks(false);
 		BuildConfig buildConfig = manager.getBuildConfig();
 		buildConfig.setMPPRCostTableSearchRange(params.getMPPRStartCT(), params.getMPPREndCT());
